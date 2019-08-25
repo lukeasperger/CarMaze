@@ -57,24 +57,13 @@ def label_images(grid, maze_height, maze_width, imagenet_dict):
             labels[i].append(imagenet_dict[score_arr.argmax()])
 
             # compare triceratops score to sports car score
-            tric = score_arr[0, 51]
-            sports = score_arr[0, 817]
-            tow_truck = score_arr[0, 864]
-            if sports > tric or tow_truck > tric:
+            dyno_score = np.average(score_arr[0, 38:52]) # looks at all types of lizards / dinosaurs
+            car_score = np.average(score_arr[0, 817], score_arr[0,864], score_arr[0,829], score_arr[0,751],
+                                   score_arr[0, 436], score_arr[0,479])
+            if car_score > dyno_score:
                 car_grid[i, j] = 1
 
     return car_grid
-
-
-    # normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225])
-    # img = grid[0, 1]
-    # img = Image.fromarray(img[:,:,:3])
-    # img.show()
-    # trans = transforms.ToTensor()
-    # img_tens = transform(img)
-    # img_tens = img_tens.unsqueeze(0)
-    # scores = resnet18.forward(img_tens)
-    # score_arr = scores.detach().numpy()
 
 
 
