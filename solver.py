@@ -2,11 +2,11 @@ import numpy as np
 import torchvision.models as models
 import torchvision.transforms as transforms
 from PIL import Image
+from PIL import ImageDraw
 import string
-import json
 
-def segment_maze(maze_height, maze_width):
-    im = Image.open("maze.png")
+def segment_maze(maze_height, maze_width, filename):
+    im = Image.open(filename)
     im_arr = np.array(im.resize((maze_width*224, maze_height*224)))
     height, width, _ = im_arr.shape
 
@@ -99,24 +99,29 @@ def find_path(labeled_grid, starting_coord, ending_coord):
     path, _ = try_step(starting_coord, labeled_grid, ending_coord, path.copy())
     return path
 
+def draw_path(path, filename, maze_height, maze_width):
+    im = Image.open(filename)
+    frame_h = im.size[1] / maze_height
+    frame_w = im.size[0] / maze_width
+
+    img_coords = [tuple([int(a[1]*frame_w + frame_w/2), int(a[0]*frame_h + frame_h/2)]) for a in path]
+    draw = ImageDraw.Draw(im)
+    draw.line(img_coords, fill='red', width=4)
+    im.show()
+    im.save("solved_maze.png")
+
 # Set maze parameters here
 maze_height = 8
 maze_width = 14
 starting_coord = (3, 13)
 ending_coord = (3, 0)
+filename = "maze.png"
 
 # Read image into maze
-# grid = segment_maze(maze_height, maze_width)
-# imagenet_dict = read_labels()
-# labeled_grid = label_images(grid, maze_height, maze_width, imagenet_dict)
-#
-# grid = labeled_grid.tolist()
-# with open('grid.txt', 'w') as outfile:
-#     json.dump(grid, outfile)
-
-with open('grid.txt') as json_file:
-    labeled_grid = np.array(json.load(json_file))
+grid = segment_maze(maze_height, maze_width, filename)
+imagenet_dict = read_labels()
+labeled_grid = label_images(grid, maze_height, maze_width, imagenet_dict)
 
 # Solve maze
 path = find_path(labeled_grid, starting_coord, ending_coord)
-print("done")
+draw_path(path, filename, maze_height, maze_width)
